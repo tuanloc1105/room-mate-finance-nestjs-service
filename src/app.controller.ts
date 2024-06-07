@@ -10,20 +10,15 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  getHello(@Req() request: Request): string {
+  async getHello(@Req() request: Request): Promise<string> {
     const context = prepareRequestContext(request);
+    const serviceResult = await this.appService.getHello(context);
     AppLogger.log(
       AppController.name,
       LogLevel.INFO,
       context,
-      `${this.appService.getHello()}`,
+      `${serviceResult}`,
     );
-    return (
-      this.appService.getHello() +
-      ' - ' +
-      context.get('traceId') +
-      ' - ' +
-      context.get('startTime')
-    );
+    return serviceResult;
   }
 }

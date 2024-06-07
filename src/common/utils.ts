@@ -1,6 +1,12 @@
 import { AppContext } from './app.context';
 import { Request } from 'express';
 import { platform } from 'os';
+import { AppLogger } from './app.logger';
+import { LogLevel } from '../enums/log.level.enum';
+import { promisify } from 'util';
+import { exec } from 'child_process';
+
+const execAsync = promisify(exec);
 
 export function generateUUID(): string {
   // Generate a random number between 0 and 15 and convert it to a hexadecimal string
@@ -21,8 +27,8 @@ export function prepareRequestContext(request: Request): AppContext {
   return requestContext;
 }
 
-export async function shellout(
-  ctx: any,
+export async function shellOut(
+  context: AppContext,
   command: string,
   directory?: string,
 ): Promise<{
@@ -31,11 +37,49 @@ export async function shellout(
   error: Error | null;
 }> {
   const cmd =
-    platform() === 'win32' ? `cmd /c ${command}` : `bash -c ${command}`;
+    platform() === 'win32' ? `cmd /c "${command}"` : `bash -c "${command}"`;
 
   if (directory) {
+    AppLogger.log(
+      'shellOut',
+      LogLevel.INFO,
+      context,
+      `Start to execute a command at directory:
+  - command: ${command}
+  - directory: ${directory}`,
+    );
   } else {
+    AppLogger.log(
+      'shellOut',
+      LogLevel.INFO,
+      context,
+      `Start to execute a command: ${command}`,
+    );
   }
 
-  return null;
+  try {
+    const { stdout, stderr } = await execAsync(cmd, { cwd: directory });
+    const stdoutString = stdout.trim();
+    const stderrString = stderr.trim();
+    AppLogger.log(
+      'shellOut',
+      LogLevel.INFO,
+      context,
+      `Execute command result:
+  - stdout: ${stdoutString}
+  - stderr: ${stderrString}`,
+    );
+    return { stdout: stdoutString, stderr: stderrString, error: null };
+  } catch (error) {
+    const stdoutString = error.stdout ? error.stdout.trim() : '';
+    const stderrString = error.stderr ? error.stderr.trim() : '';
+    AppLogger.log(
+      'shellOut',
+      LogLevel.ERROR,
+      context,
+      `Execute command error:
+  - error: ${error}`,
+    );
+    return { stdout: stdoutString, stderr: stderrString, error };
+  }
 }
