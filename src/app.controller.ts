@@ -7,13 +7,23 @@ import { Request } from 'express';
 
 @Controller()
 export class AppController {
-  
-  constructor(private readonly appService: AppService) { }
+  constructor(private readonly appService: AppService) {}
 
   @Get()
   getHello(@Req() request: Request): string {
     const context = prepareRequestContext(request);
-    AppLogger.log(AppController.name, LogLevel.INFO, context, `${this.appService.getHello()}`)
-    return this.appService.getHello() + " - " + context.get("traceId") + " - " + context.get("startTime");
+    AppLogger.log(
+      AppController.name,
+      LogLevel.INFO,
+      context,
+      `${this.appService.getHello()}`,
+    );
+    return (
+      this.appService.getHello() +
+      ' - ' +
+      context.get('traceId') +
+      ' - ' +
+      context.get('startTime')
+    );
   }
 }

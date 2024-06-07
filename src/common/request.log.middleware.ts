@@ -9,14 +9,19 @@ export class LoggingMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const context = prepareRequestContext(req);
     const { method, originalUrl, body, headers } = req;
-    
+
     const requestMessageToLog: string = `
     - Request: ${method} ${originalUrl}
     - Request Headers: ${JSON.stringify(headers)}
-    - Request Body: ${JSON.stringify(body)}`
-    AppLogger.log(LoggingMiddleware.name, LogLevel.INFO, context, requestMessageToLog)
+    - Request Body: ${JSON.stringify(body)}`;
+    AppLogger.log(
+      LoggingMiddleware.name,
+      LogLevel.INFO,
+      context,
+      requestMessageToLog,
+    );
 
-    let responseMessageToLog: string = ``
+    let responseMessageToLog: string = ``;
 
     const start = Date.now();
     const originalSend = res.send.bind(res);
@@ -32,12 +37,16 @@ export class LoggingMiddleware implements NestMiddleware {
     // Intercept the response send method
     res.send = function (body) {
       // Log the response body
-      responseMessageToLog = responseMessageToLog + `
-      - Response Body: ${body}` 
+      responseMessageToLog =
+        responseMessageToLog +
+        `
+      - Response Body: ${body}`;
 
       // Log the response headers
-      responseMessageToLog = responseMessageToLog + `
-      - Response Headers: ${JSON.stringify(responseHeaders)}` 
+      responseMessageToLog =
+        responseMessageToLog +
+        `
+      - Response Headers: ${JSON.stringify(responseHeaders)}`;
 
       // Call the original send method with the body
       return originalSend(body);
@@ -46,10 +55,17 @@ export class LoggingMiddleware implements NestMiddleware {
     res.on('finish', () => {
       const responseTime = Date.now() - start;
       const { statusCode, statusMessage } = res;
-      responseMessageToLog = responseMessageToLog + `
+      responseMessageToLog =
+        responseMessageToLog +
+        `
       - Response: ${statusCode} ${statusMessage}
-      - Response Time: ${responseTime}ms` 
-      AppLogger.log(LoggingMiddleware.name, LogLevel.INFO, context, responseMessageToLog)
+      - Response Time: ${responseTime}ms`;
+      AppLogger.log(
+        LoggingMiddleware.name,
+        LogLevel.INFO,
+        context,
+        responseMessageToLog,
+      );
     });
 
     next();
