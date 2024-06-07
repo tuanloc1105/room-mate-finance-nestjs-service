@@ -7,6 +7,32 @@ type Sample {
   name: String!
 }
 
+type LoginOutput {
+  traceId: String!
+  errorCode: String!
+  errorMessage: String!
+  accessToken: String
+  expiresIn: Float
+  refreshExpiresIn: Float
+  refreshToken: String
+  tokenType: String
+  idToken: String
+  notBeforePolicy: Float
+  sessionState: String
+  scope: String
+  error: String
+  errorDescription: String
+}
+
 type Query {
   samples: [Sample!]!
+}
+
+type Mutation {
+  login(loginInput: LoginInput!): LoginOutput!
+}
+
+input LoginInput {
+  username: String!
+  password: String!
 }

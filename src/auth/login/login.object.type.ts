@@ -1,6 +1,6 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
-@ObjectType()
+@InputType()
 export class LoginInput {
   @Field()
   username: string;
@@ -20,36 +20,54 @@ export class LoginOutput {
   @Field()
   errorMessage: string;
 
-  @Field()
+  @Field({ nullable: true })
   accessToken: string;
 
-  @Field()
+  @Field({ nullable: true })
   expiresIn: number;
 
-  @Field()
+  @Field({ nullable: true })
   refreshExpiresIn: number;
 
-  @Field()
+  @Field({ nullable: true })
   refreshToken: string;
 
-  @Field()
+  @Field({ nullable: true })
   tokenType: string;
 
-  @Field()
+  @Field({ nullable: true })
   idToken: string;
 
-  @Field()
+  @Field({ nullable: true })
   notBeforePolicy: number;
 
-  @Field()
+  @Field({ nullable: true })
   sessionState: string;
 
-  @Field()
+  @Field({ nullable: true })
   scope: string;
 
-  @Field()
+  @Field({ nullable: true })
   error: string;
 
-  @Field()
+  @Field({ nullable: true })
   errorDescription: string;
+
+  static parse(input: LoginOutput, object: any): LoginOutput {
+    if (!input) {
+      input = new LoginOutput();
+    }
+    input.accessToken = object['access_token'];
+    input.expiresIn = object['expires_in'];
+    input.refreshExpiresIn = object['refresh_expires_in'];
+    input.refreshToken = object['refresh_token'];
+    input.tokenType = object['token_type'];
+    input.idToken = object['id_token'];
+    input.notBeforePolicy = object['not-before-policy'];
+    input.sessionState = object['session_state'];
+    input.scope = object['scope'];
+    input.error = object.error;
+    input.errorDescription = object.errorDescription;
+    return input;
+  }
 }

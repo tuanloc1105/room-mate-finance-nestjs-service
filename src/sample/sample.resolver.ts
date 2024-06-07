@@ -10,7 +10,7 @@ export class SampleResolver {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   @Query((returns) => [Sample])
-  samples(@Context() request): Sample[] {
+  samples(@Context() request: any): Sample[] {
     const context = prepareGraphQLRequestContext(request);
     console.log(context);
     return this.sampleService.findAll();

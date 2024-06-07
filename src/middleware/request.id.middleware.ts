@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request } from 'express';
-import { generateUUID } from './utils';
+import { generateUUID } from '../common/utils';
 
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {

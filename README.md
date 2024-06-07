@@ -73,3 +73,27 @@ nest g module sample
 nest g service sample
 nest g resolver sample
 ```
+
+### Example mutation
+
+```text
+mutation {
+  login(loginInput: { username: "admin", password: "admin" }) {
+    traceId
+    errorCode
+    errorMessage
+    accessToken
+  }
+}
+```
+
+### Example query
+
+```text
+{
+  samples {
+    id
+    name
+  }
+}
+```
