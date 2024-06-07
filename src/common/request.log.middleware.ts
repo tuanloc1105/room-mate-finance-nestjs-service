@@ -1,13 +1,14 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AppLogger } from './app.logger';
 import { LogLevel } from 'src/enums/log.level.enum';
-import { prepareRequestContext } from './utils';
+import { prepareGraphQLRequestContext } from './utils';
+import { AppContext } from './app.context';
 
 @Injectable()
 export class LoggingMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
-    const context = prepareRequestContext(req);
+    const context: AppContext = prepareGraphQLRequestContext(req);
     const { method, originalUrl, body, headers } = req;
 
     const requestMessageToLog: string = `

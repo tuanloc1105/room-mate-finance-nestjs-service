@@ -4,11 +4,16 @@ import { generateUUID } from './utils';
 
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
-    (req as any).context = {
-      startTime: Date.now(),
-      traceId: generateUUID(),
-    };
+  use(req: Request, res: Response, next: NextFunction): void {
+    if (req.url.includes('graph') || req.url === '/') {
+      req['startTime'] = Date.now();
+      req['traceId'] = generateUUID();
+    } else {
+      (req as any).context = {
+        startTime: Date.now(),
+        traceId: generateUUID(),
+      };
+    }
     next();
   }
 }

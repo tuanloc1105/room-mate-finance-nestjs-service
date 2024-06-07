@@ -12,4 +12,15 @@ export class AppContext {
   get(key: string): any {
     return this.data.get(key);
   }
+
+  remove(key: string): boolean {
+    return this.data.delete(key);
+  }
+
+  setIfAbsent(key: string, value: any): boolean {
+    if (this.data.has(key)) {
+      return false;
+    }
+    this.data.set(key, value);
+  }
 }

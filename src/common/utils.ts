@@ -27,6 +27,25 @@ export function prepareRequestContext(request: Request): AppContext {
   return requestContext;
 }
 
+export function prepareGraphQLRequestContext(request: any): AppContext {
+  const requestContext: AppContext = new AppContext();
+  try {
+    requestContext.setIfAbsent('startTime', request.req['startTime']);
+    requestContext.setIfAbsent('traceId', request.req['traceId']);
+  } catch (error) {
+    requestContext.remove('startTime');
+    requestContext.remove('traceId');
+  }
+  try {
+    requestContext.setIfAbsent('startTime', request['startTime']);
+    requestContext.setIfAbsent('traceId', request['traceId']);
+  } catch (error) {
+    requestContext.remove('startTime');
+    requestContext.remove('traceId');
+  }
+  return requestContext;
+}
+
 export async function shellOut(
   context: AppContext,
   command: string,
@@ -82,4 +101,10 @@ export async function shellOut(
     );
     return { stdout: stdoutString, stderr: stderrString, error };
   }
+}
+
+export function formatString(format: string, ...args: any[]): string {
+  return format.replace(/{(\d+)}/g, (match, number) => {
+    return typeof args[number] !== 'undefined' ? args[number] : match;
+  });
 }
