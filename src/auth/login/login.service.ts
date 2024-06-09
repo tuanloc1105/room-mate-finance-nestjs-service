@@ -1,32 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { LoginInput, LoginOutput } from './login.object.type';
-import * as process from 'node:process';
-import { keycloakLoginPath } from '../../constant/app.constant';
-import { shellOut } from '../../common/utils';
 import { AppContext } from '../../common/app.context';
+import { KeycloakHandlerService } from '../../service/keycloak.handler.service';
 import { ErrorCodeEnum } from '../../enums/error.code.enum';
 
 @Injectable()
 export class LoginService {
+  constructor(private readonly keycloakService: KeycloakHandlerService) {}
+
   async login(context: AppContext, input: LoginInput): Promise<LoginOutput> {
-    const loginCurlCommand: string = `curl -k --connect-timeout 30 --max-time 40 --location '${process.env.KEYCLOAK_API_URL + keycloakLoginPath}' --header 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'client_id=${process.env.KEYCLOAK_CLIENT_ID}' --data-urlencode 'client_secret=${process.env.KEYCLOAK_CLIENT_SECRET}' --data-urlencode 'username=${input.username}' --data-urlencode 'password=${input.password}' --data-urlencode 'grant_type=password' --data-urlencode 'scope=openid'`;
-    const loginCurlCommandResult = await shellOut(context, loginCurlCommand);
-    let output: LoginOutput = new LoginOutput();
-    if (loginCurlCommandResult.error) {
-      output.traceId = context.get('traceId');
+    const loginResult = await this.keycloakService.login(
+      context,
+      input.username,
+      input.password,
+    );
+    const output = new LoginOutput();
+    output.traceId = context.get('traceId');
+    if (loginResult.error) {
       output.errorCode = String(ErrorCodeEnum.FAILURE.code);
       output.errorMessage = ErrorCodeEnum.FAILURE.message;
     } else {
-      const object = JSON.parse(loginCurlCommandResult.stdout);
-      if (object.error) {
-        output.traceId = context.get('traceId');
+      if (loginResult.result.error) {
         output.errorCode = String(ErrorCodeEnum.AUTH_FAILURE.code);
         output.errorMessage = ErrorCodeEnum.AUTH_FAILURE.message;
       } else {
-        output = LoginOutput.parse(output, object);
-        output.traceId = context.get('traceId');
         output.errorCode = String(ErrorCodeEnum.SUCCESS.code);
         output.errorMessage = ErrorCodeEnum.SUCCESS.message;
+        output.accessToken = loginResult.result.access_token;
+        output.expiresIn = loginResult.result.expires_in;
+        output.refreshExpiresIn = loginResult.result.refresh_expires_in;
+        output.refreshToken = loginResult.result.refresh_token;
+        output.tokenType = loginResult.result.token_type;
+        output.idToken = loginResult.result.id_token;
+        output.notBeforePolicy = loginResult.result['not-before-policy'];
+        output.sessionState = loginResult.result.session_state;
+        output.scope = loginResult.result.scope;
+        output.error = loginResult.result.error;
+        output.errorDescription = loginResult.result.error_description;
       }
     }
     return output;

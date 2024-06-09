@@ -53,21 +53,4 @@ export class LoginOutput {
   @Field({ nullable: true })
   errorDescription: string;
 
-  static parse(input: LoginOutput, object: any): LoginOutput {
-    if (!input) {
-      input = new LoginOutput();
-    }
-    input.accessToken = object['access_token'];
-    input.expiresIn = object['expires_in'];
-    input.refreshExpiresIn = object['refresh_expires_in'];
-    input.refreshToken = object['refresh_token'];
-    input.tokenType = object['token_type'];
-    input.idToken = object['id_token'];
-    input.notBeforePolicy = object['not-before-policy'];
-    input.sessionState = object['session_state'];
-    input.scope = object['scope'];
-    input.error = object.error;
-    input.errorDescription = object.errorDescription;
-    return input;
-  }
 }

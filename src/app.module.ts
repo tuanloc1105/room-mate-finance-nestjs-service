@@ -7,11 +7,12 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { SampleModule } from './sample/sample.module';
 import { LoginModule } from './auth/login/login.module';
 import { ConfigModule } from '@nestjs/config';
+import { KeycloakHandlerService } from './service/keycloak.handler.service';
 
 @Module({
   imports: [ConfigModule.forRoot(), GraphqlModule, SampleModule, LoginModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, KeycloakHandlerService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
