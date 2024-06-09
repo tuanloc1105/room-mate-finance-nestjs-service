@@ -1,17 +1,18 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request } from 'express';
 import { generateUUID } from '../common/utils';
+import { AppLogger } from '../common/app.logger';
 
 @Injectable()
 export class RequestIdMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction): void {
     if (req.url.includes('graph') || req.url === '/') {
-      req['startTime'] = Date.now();
-      req['traceId'] = generateUUID();
+      req[AppLogger.startTimeKey] = Date.now();
+      req[AppLogger.traceIdKey] = generateUUID();
     } else {
       (req as any).context = {
-        startTime: Date.now(),
-        traceId: generateUUID(),
+        start_time: Date.now(),
+        trace_id: generateUUID(),
       };
     }
     next();

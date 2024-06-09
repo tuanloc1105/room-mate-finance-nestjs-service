@@ -22,26 +22,38 @@ export function generateUUID(): string {
 export function prepareRequestContext(request: Request): AppContext {
   const context = (request as any).context;
   const requestContext: AppContext = new AppContext();
-  requestContext.set('startTime', context.startTime);
-  requestContext.set('traceId', context.traceId);
+  requestContext.set(AppLogger.startTimeKey, context.startTime);
+  requestContext.set(AppLogger.traceIdKey, context.traceId);
   return requestContext;
 }
 
 export function prepareGraphQLRequestContext(request: any): AppContext {
   const requestContext: AppContext = new AppContext();
   try {
-    requestContext.setIfAbsent('startTime', request.req['startTime']);
-    requestContext.setIfAbsent('traceId', request.req['traceId']);
+    requestContext.setIfAbsent(
+      AppLogger.startTimeKey,
+      request.req[AppLogger.startTimeKey],
+    );
+    requestContext.setIfAbsent(
+      AppLogger.traceIdKey,
+      request.req[AppLogger.traceIdKey],
+    );
   } catch (error) {
-    requestContext.remove('startTime');
-    requestContext.remove('traceId');
+    requestContext.remove(AppLogger.startTimeKey);
+    requestContext.remove(AppLogger.traceIdKey);
   }
   try {
-    requestContext.setIfAbsent('startTime', request['startTime']);
-    requestContext.setIfAbsent('traceId', request['traceId']);
+    requestContext.setIfAbsent(
+      AppLogger.startTimeKey,
+      request[AppLogger.startTimeKey],
+    );
+    requestContext.setIfAbsent(
+      AppLogger.traceIdKey,
+      request[AppLogger.traceIdKey],
+    );
   } catch (error) {
-    requestContext.remove('startTime');
-    requestContext.remove('traceId');
+    requestContext.remove(AppLogger.startTimeKey);
+    requestContext.remove(AppLogger.traceIdKey);
   }
   return requestContext;
 }
@@ -107,4 +119,34 @@ export function formatString(format: string, ...args: any[]): string {
   return format.replace(/{(\d+)}/g, (match, number) => {
     return typeof args[number] !== 'undefined' ? args[number] : match;
   });
+}
+
+export function log(
+  target: any,
+  propertyName: string,
+  propertyDescriptor: PropertyDescriptor,
+): PropertyDescriptor {
+  const method = propertyDescriptor.value;
+
+  propertyDescriptor.value = async function (...args: any[]) {
+    const context = args.find((arg) => arg instanceof AppContext) as
+      | AppContext
+      | undefined;
+
+    if (!context) {
+      return null;
+    }
+    AppLogger.log('method-input-value-array', LogLevel.INFO, context, [
+      `Calling ${propertyName} with arguments:`,
+      args,
+    ]);
+    const result = await method.apply(this, args);
+    AppLogger.log('method-input-value-array', LogLevel.INFO, context, [
+      `Result: `,
+      result,
+    ]);
+    return result;
+  };
+
+  return propertyDescriptor;
 }

@@ -13,12 +13,16 @@ export class LoggingMiddleware implements NestMiddleware {
       return;
     }
     const context: AppContext = prepareGraphQLRequestContext(req);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { method, originalUrl, body, headers } = req;
 
+    // const requestMessageToLog: string = `
+    // - Request: ${method} ${originalUrl}
+    // - Request Headers: ${JSON.stringify(headers)}
+    // - Request Body: ${JSON.stringify(body)}`;
     const requestMessageToLog: string = `
     - Request: ${method} ${originalUrl}
-    - Request Headers: ${JSON.stringify(headers)}
-    - Request Body: ${JSON.stringify(body)}`;
+    - Request Headers: ${JSON.stringify(headers)}`;
     AppLogger.log(
       LoggingMiddleware.name,
       LogLevel.INFO,
@@ -42,16 +46,16 @@ export class LoggingMiddleware implements NestMiddleware {
     // Intercept the response send method
     res.send = function (body) {
       // Log the response body
-      responseMessageToLog =
-        responseMessageToLog +
-        `
-      - Response Body: ${body}`;
+      // responseMessageToLog =
+      //   responseMessageToLog +
+      //   `
+      // - Response Body: ${body}`;
 
       // Log the response headers
       responseMessageToLog =
         responseMessageToLog +
         `
-      - Response Headers: ${JSON.stringify(responseHeaders)}`;
+    - Response Headers: ${JSON.stringify(responseHeaders)}`;
 
       // Call the original send method with the body
       return originalSend(body);
@@ -63,8 +67,8 @@ export class LoggingMiddleware implements NestMiddleware {
       responseMessageToLog =
         responseMessageToLog +
         `
-      - Response: ${statusCode} ${statusMessage}
-      - Response Time: ${responseTime}ms`;
+    - Response: ${statusCode} ${statusMessage}
+    - Response Time: ${responseTime}ms`;
       AppLogger.log(
         LoggingMiddleware.name,
         LogLevel.INFO,

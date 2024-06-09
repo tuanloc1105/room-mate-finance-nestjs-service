@@ -16,6 +16,7 @@ import { KeycloakHandlerService } from './service/keycloak.handler.service';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    // consumer.apply(RequestIdMiddleware).forRoutes('*');
     consumer.apply(RequestIdMiddleware, LoggingMiddleware).forRoutes('*');
   }
 }

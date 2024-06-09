@@ -87,6 +87,14 @@ mutation {
 }
 ```
 
+Header:
+
+```text
+{
+  "asd":"asd"
+}
+```
+
 ### Example query
 
 ```text
